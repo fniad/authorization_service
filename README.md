@@ -34,8 +34,8 @@
 
 ### Пример корректного запроса
 
+```POST /user-login/```
 ```json
-POST /user-login/
 {
    'phone_number': '+79999999999'
 }
@@ -63,8 +63,8 @@ POST /user-login/
 
 ### Пример корректного запроса
 
+```POST /input_verification_code/```
 ```json
-POST /input_verification_code/
 {
     "phone_number": "+79996661515",
     "entered_code": "3030"
@@ -87,7 +87,7 @@ POST /input_verification_code/
 
 ### Пример корректного запроса
 
-```json
+```
 GET /userprofiles/
 ```
 
@@ -138,7 +138,7 @@ GET /userprofiles/
 
 ### Пример корректного запроса
 
-```json
+```
 GET /userprofiles/userprofile_id/
 ```
 
@@ -177,9 +177,8 @@ GET /userprofiles/userprofile_id/
 - **Статус код 403**: Ошибка прав доступа, если пытаться редактировать чужой профиль. **Сообщение**: Вы не можете изменять и просматривать чужие профили.
 
 ### Пример корректного запроса
-
+```PUT /userprofiles/userprofile_id/```
 ```json
-PUT /userprofiles/userprofile_id/
 {
   "referral_code": "YU0I4D"
 }
@@ -221,10 +220,15 @@ PUT /userprofiles/userprofile_id/
 
 1. Клонирование репозитория ```git clone https://github.com/fniad/authorization_service.git```
 2. ```cd authorization_service```
-3. На Ubuntu или Linux сначала остановить postgresql ```systemctl stop postgresql```
-4. ```docker-compose build```
-5. ```docker-compose exec app python manage.py migrate``` в соседнем терминале
-6. ```docker-compose up```
+3. ```touch .env```
+```nano .env```
+и заполнить по шаблону из **.env.test**
+4. ```touch .env.docker```
+```nano .env.docker```
+и заполнить по шаблону из **.env.docker.test**
+5. На Ubuntu или Linux сначала остановить postgresql ```systemctl stop postgresql```
+6. ```docker-compose build```
+7. ```docker-compose up```
 
 
 # Использование
