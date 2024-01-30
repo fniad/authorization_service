@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "authorization-service"
+version = "0.1.0"
+description = ""
+authors = ["fniad <artkamproject@gmail.com>"]
+readme = "README.md"
+packages = [{include = "authorization_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.0.1"
+psycopg2-binary = "^2.9.9"
+djangorestframework = "^3.14.0"
+python-dotenv = "^1.0.1"
+djangorestframework-simplejwt = "^5.3.1"
+phonenumbers = "^8.13.29"
+drf-yasg = "^1.21.7"
+pytest = "^8.0.0"
+pytest-django = "^4.7.0"
+pytest-cov = "^4.1.0"
+setuptools = "^69.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
