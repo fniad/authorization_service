@@ -134,6 +134,17 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all().order_by('id')
     pagination_class = UserProfilePagination
 
+    def get_object_or_none(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        filter_kwargs = {'id': self.kwargs['pk']}
+        try:
+            obj = queryset.get(**filter_kwargs)
+            if not self.request.user == obj.user:
+                return None
+            return obj
+        except UserProfile.DoesNotExist:
+            return None
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -154,14 +165,20 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
     def _handle_referral_code_update(self, request, referral_code, *args, **kwargs):
         """Обработка обновления профиля пользователя с реферальным кодом"""
+        profile_2 = self.get_object_or_none()
         profile = self.get_object()
+        if profile_2 is None:
+            return Response({'error': 'Профиль с таким реферальным кодом не найден'}, status=status.HTTP_404_NOT_FOUND)
 
         if referral_code == profile.user_referral_code:
             return Response({'error': 'Вы не можете использовать свой собственный реферальный код'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        referred_by = get_object_or_404(UserProfile, user_referral_code=referral_code)
+        if profile.activated_referral_code == referral_code:
+            return Response({'error': 'Вы уже активировали этот реферальный код'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
+        referred_by = get_object_or_404(UserProfile, user_referral_code=referral_code)
 
         if profile.activated_referral_code and profile.activated_referral_code != referral_code:
             return Response({'error': 'У вас уже активирован другой реферальный код'},
@@ -173,7 +190,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         profile.save()
 
         return Response({'message': 'Вы успешно стали рефералом'}, status=status.HTTP_200_OK)
-
 
     def _process_referral_code_update(self, profile, referred_by, referral_code):
         """Обработка успешного обновления профиля с реферальным кодом"""

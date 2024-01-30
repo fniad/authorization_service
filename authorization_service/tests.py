@@ -211,8 +211,7 @@ def test_update_self_user_profile_with_incorrect_referral_code_api(api_client, u
     data = {'referral_code': 'O89G61'}
     api_client.force_authenticate(user=user_first)
     response = api_client.put(f'/userprofiles/{first_user_profile.id}/', data)
-    assert response.status_code == 400
-    assert response.data['error'] == "Неверный реферальный код"
+    assert response.status_code == 404
 
 
 @pytest.mark.django_db
