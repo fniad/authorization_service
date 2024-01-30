@@ -10,7 +10,7 @@ services:
         image: postgres:15.1-alpine
         restart: always
         env_file:
-            - docker.env
+            - .env.docker
         environment:
             - PGDATA=/var/lib/postgresql/data/pgdata/
             - LANG=en_US.utf8
