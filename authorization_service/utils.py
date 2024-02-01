@@ -24,5 +24,4 @@ def get_verification_code_from_db(user):
         profile = UserProfile.objects.get(user=user)
         return profile.verification_code
     except UserProfile.DoesNotExist:
-        return None
-
+        return 'Неверный код верификации'

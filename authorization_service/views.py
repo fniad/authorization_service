@@ -56,7 +56,7 @@ class UserProfileLoginAPI(APIView):
             user = User.objects.get(username=phone_number)
             profile = UserProfile.objects.get(user=user)
             profile.verification_code = verification_code
-            profile.refresh_from_db()
+            profile.save()
             print(f'Код верификации для номера {phone_number}: {verification_code}')
         except User.DoesNotExist:
 
@@ -112,12 +112,11 @@ class InputVerificationCodeAPI(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Пользователь не найден'}, status=status.HTTP_400_BAD_REQUEST)
 
-        verification_code = get_verification_code_from_db(user=user)
-
-        if not verification_code:
+        entered_code = request.data.get('entered_code')
+        if entered_code == '':
             return Response({'error': 'Отсутствует код верификации'}, status=status.HTTP_400_BAD_REQUEST)
 
-        entered_code = request.data.get('entered_code')
+        verification_code = get_verification_code_from_db(user=user)
         if entered_code == verification_code:
             user_profile = UserProfile.objects.filter(user=user).first()
             if user_profile:
@@ -207,9 +206,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         """ Права доступа для работы с профилями пользователей"""
         if self.action in ['create', 'destroy', 'partial_update']:
             self.permission_classes = [IsAdminUser]
-        elif self.action in ['list']:
+        elif self.action in ['list', 'retrieve']:
             self.permission_classes = [IsAuthenticatedOrReadOnly]
-        elif self.action in ['retrieve', 'update']:
+        elif self.action in ['update']:
             self.permission_classes = [IsAuthenticated, IsOwner]
         else:
             self.permission_classes = [IsAuthenticatedOrReadOnly]
