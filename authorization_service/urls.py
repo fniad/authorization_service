@@ -10,6 +10,6 @@ router = DefaultRouter()
 router.register(r'userprofiles', UserProfileViewSet, basename='userprofile')
 
 urlpatterns = [
-    path('user-login/', UserProfileLoginAPI.as_view(), name='user-login'),
+    path('user_login/', UserProfileLoginAPI.as_view(), name='user_login'),
     path('input_verification_code/', InputVerificationCodeAPI.as_view(), name='input_verification_code'),
 ] + router.urls

@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
 from authorization_service.models import UserProfile
+from authorization_service.utils import get_verification_code_from_db
 from users.models import User
 
 
@@ -91,7 +92,7 @@ def incorrect_verification_code():
 def test_user_login_api(client, user_first, first_user_profile):
     """ Тест для входа в аккаунт и получения кода верификации по СМС"""
     data = {'phone_number': user_first.username}
-    response = client.post('/user-login/', data)
+    response = client.post('/user_login/', data)
     assert response.status_code == 200
 
 
@@ -99,7 +100,7 @@ def test_user_login_api(client, user_first, first_user_profile):
 def test_new_user_login_api(client):
     """ Тест для входа нового пользователя в аккаунт и получения кода верификации по СМС"""
     data = {'phone_number': '+79999999991'}
-    response = client.post('/user-login/', data)
+    response = client.post('/user_login/', data)
     assert response.status_code == 200
 
 
@@ -107,7 +108,7 @@ def test_new_user_login_api(client):
 def test_incorrect_phone_number_api(client, incorrect_phone_number):
     """ Тест для входа по некорректному номеру телефона """
     data = {'phone_number': incorrect_phone_number}
-    response = client.post('/user-login/', data)
+    response = client.post('/user_login/', data)
     assert response.status_code == 400
     assert response.data == [ErrorDetail(string='Введите номер телефона в формате +79999999999', code='invalid')]
 
@@ -124,7 +125,16 @@ def test_input_correct_verification_code_api(client, user_first, correct_verific
 @pytest.mark.django_db
 def test_input_incorrect_verification_code_api(client, user_first, incorrect_verification_code):
     """ Тест для ввода некорректного кода верификации """
-    data = {'phone_number': user_first.username, 'entered_code': incorrect_verification_code}
+    data = {'phone_number': user_first.username, 'entered_code': '0000'}
+    response = client.post('/input_verification_code/', data)
+    assert response.status_code == 400
+    assert response.data['error'] == 'Неверный код верификации'
+
+
+@pytest.mark.django_db
+def test_input_missing_verification_code_api(client, user_first):
+    """ Тест для ввода кода верификации при отсутствующем коде """
+    data = {'phone_number': user_first.username, 'entered_code': ''}
     response = client.post('/input_verification_code/', data)
     assert response.status_code == 400
     assert response.data['error'] == 'Отсутствует код верификации'
@@ -139,6 +149,21 @@ def test_input_incorrect_phone_number_to_verification_code_api(client, incorrect
     assert response.status_code == 400
     assert response.data == [ErrorDetail(string='Введите номер телефона в формате +79999999999', code='invalid')]
 
+@pytest.mark.django_db
+def test_user_login_and_input_verification_code_api(client, user_first, first_user_profile):
+    """ Тест для входа в аккаунт, получения кода верификации по СМС и ввода кода верификации"""
+
+    # Шаг 1: Вход в аккаунт и получение кода верификации
+    login_data = {'phone_number': user_first.username}
+    login_response = client.post('/user_login/', login_data)
+    assert login_response.status_code == 200
+
+    # Шаг 2: Ввод кода верификации
+    verification_code = get_verification_code_from_db(user_first)
+    input_verification_data = {'phone_number': user_first.username, 'entered_code': verification_code}
+    input_verification_response = client.post('/input_verification_code/', input_verification_data)
+    assert input_verification_response.status_code == 200
+    assert input_verification_response.data['message'] == 'Вход выполнен успешно'
 
 # Тесты для работы с профилями
 
@@ -176,8 +201,8 @@ def test_list_user_profiles_api(client, user_first, first_user_profile, user_sec
 
 
 @pytest.mark.django_db
-def test_get_user_profile_api(api_client, user_first, first_user_profile, jwt_token_for_first_user):
-    """ Тест для получения профиля пользователя """
+def test_get_self_user_profile_api(api_client, user_first, first_user_profile, jwt_token_for_first_user):
+    """ Тест для получения своего профиля пользователя """
     api_client.force_authenticate(user=user_first)
     response = api_client.get(f'/userprofiles/{first_user_profile.id}/')
     assert response.status_code == 200
@@ -189,6 +214,23 @@ def test_get_user_profile_api(api_client, user_first, first_user_profile, jwt_to
         "user_referred_code_used": first_user_profile.user_referred_code_used,
         "referred_users": None,
         "activated_referral_code": first_user_profile.activated_referral_code,
+        "referred_by": None
+    }
+
+@pytest.mark.django_db
+def test_get_other_user_profile_api(api_client, user_first, second_user_profile, jwt_token_for_first_user):
+    """ Тест для получения чужого профиля пользователя """
+    api_client.force_authenticate(user=user_first)
+    response = api_client.get(f'/userprofiles/{second_user_profile.id}/')
+    assert response.status_code == 200
+    profile_data = response.json()
+    assert profile_data == {
+        "id": second_user_profile.id,
+        "phone_number": second_user_profile.phone_number,
+        "user_referral_code": second_user_profile.user_referral_code,
+        "user_referred_code_used": second_user_profile.user_referred_code_used,
+        "referred_users": None,
+        "activated_referral_code": second_user_profile.activated_referral_code,
         "referred_by": None
     }
 
