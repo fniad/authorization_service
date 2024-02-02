@@ -19,7 +19,7 @@
 ## 1. Получение кода верификации
 
 - **Метод**: ```POST```
-- **URL**: ```/user-login/```
+- **URL**: ```/user_login/```
 
 ### Параметры запроса
 
@@ -34,7 +34,7 @@
 
 ### Пример корректного запроса
 
-```POST /user-login/```
+```POST /user_login/```
 ```json
 {
    "phone_number": "+79999999999"
@@ -220,15 +220,12 @@ GET /userprofiles/userprofile_id/
 
 1. Клонирование репозитория ```git clone https://github.com/fniad/authorization_service.git```
 2. ```cd authorization_service```
-3. ```touch .env```
-```nano .env```
-и заполнить по шаблону из **.env.test**
-4. ```touch .env.docker```
+3. ```touch .env.docker```
 ```nano .env.docker```
 и заполнить по шаблону из **.env.docker.test**
-5. На Ubuntu или Linux сначала остановить postgresql ```systemctl stop postgresql```
-6. ```docker-compose build```
-7. ```docker-compose up```
+4. На Ubuntu или Linux сначала остановить postgresql ```systemctl stop postgresql```
+5. ```docker-compose build```
+6. ```docker-compose up```
 
 
 # Использование
