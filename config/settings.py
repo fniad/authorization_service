@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# dot_env = os.path.join(BASE_DIR / '.env') # for local
+# dot_env = os.path.join(BASE_DIR / '.env')   # for local
 dot_env = os.path.join(BASE_DIR / '.env.docker')
 load_dotenv(dotenv_path=dot_env)
 
@@ -95,17 +95,6 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('ENGINE_DB'),
-#         'NAME': 'postgres',
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': 'db',
-#         'PORT': 5432,
-#     }
-# }
 
 
 # Password validation
